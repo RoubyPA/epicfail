@@ -1,6 +1,9 @@
 # Epicfail
 Gtk Dice Roller
 
+![Epicfail main window](/Doc/Screen/Alpha_0.2.1.png)
+![Epicfail result window](/Doc/Screen/Alpha_0.2.1_Result.png)
+
 ## How to epicfail
 ### Get from source
 #### Compilation
