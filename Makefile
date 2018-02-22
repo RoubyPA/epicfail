@@ -1,13 +1,15 @@
+BUILD_PATH=build
+
 all: Application
 
 Application: autogen src/makefile
-	make -C src/
+	BUILD_PATH=../$(BUILD_PATH) make -C src/
 
 autogen:
-	mkdir -p ./build/bin
+	mkdir -p $(BUILD_PATH)/
 
 run:
-	EF_DIR=./data ./build/bin/epicfail
+	EF_DIR=./data $(BUILD_PATH)/epicfail
 
 clean:
 	make -C src/ clean
