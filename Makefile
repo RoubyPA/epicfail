@@ -3,7 +3,7 @@ BUILD_PATH=build
 all: Application
 
 Application: autogen src/makefile
-	BUILD_PATH=../$(BUILD_PATH) make -C src/
+	BUILD_PATH=../$(BUILD_PATH) PREFIX=$(PREFIX) make -C src/
 
 autogen:
 	mkdir -p $(BUILD_PATH)/

@@ -6,7 +6,7 @@
 #include <string.h>
 #include <time.h>
 
-#define HEIGHT 400
+#define HEIGHT 200
 #define WIDTH 400
 
 #define IMG_FORMAT "%s/images/d%.3d.png"
@@ -22,7 +22,7 @@ struct _on_click_data {
 /*private*/ static void Application_init_alloc (Application *self);
 /*private*/ static void Application_show (Application *self);
 /*private*/ static void Application_new_window (Application *self);
-/*private*/ static void Application_set_menu (Application *self);
+/* /\*private*\/ static void Application_set_menu (Application *self); */
 /*private*/ static void Application_connect (Application *self);
 /*private*/ static void Application_create_buttons (Application *self);
 /*private*/ static void Application_button_connect (Application *self, Dice *dice, int index);
@@ -169,20 +169,20 @@ Application_new_window (Application *self)
   gtk_window_set_title (GTK_WINDOW(self->window), self->title);
   gtk_window_set_default_size (GTK_WINDOW(self->window),
 			       HEIGHT, WIDTH);
-gtk_window_set_resizable (GTK_WINDOW(self->window), FALSE);
+  gtk_window_set_resizable (GTK_WINDOW(self->window), FALSE);
  
-  self->m_hbox = gtk_hbox_new (TRUE, 0);
-  self->l_vbox = gtk_vbox_new (TRUE, 0);
-  self->r_vbox = gtk_vbox_new (TRUE, 0);
+  self->m_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  self->l_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+  self->r_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
   
   gtk_container_add(GTK_CONTAINER(self->window), self->m_hbox);
   gtk_container_add(GTK_CONTAINER(self->m_hbox), self->l_vbox);
   gtk_container_add(GTK_CONTAINER(self->m_hbox), self->r_vbox);
 }
 
-/*private*/ static void
-Application_create_menu (Application *self)
-{
+/* /\*private*\/ static void */
+/* Application_create_menu (Application *self) */
+/* { */
   /* self->menu_bar = gtk_menu_bar_new (); */
   /* self->menu = gtk_menu_new (); */
   
@@ -196,7 +196,7 @@ Application_create_menu (Application *self)
 
   /* gtk_box_pack_start(GTK_BOX(self->m_hbox), */
   /* 		     self->menu_bar, FALSE, FALSE, 0); */
-}
+/* } */
 
 /*private*/ static void
 Application_create_buttons (Application *self)
@@ -242,20 +242,6 @@ Application_connect (Application *self)
 {
   g_signal_connect( G_OBJECT(self->window), "delete-event",
                     G_CALLBACK(on_quit), (gpointer)self);
-}
-
-
-/*private*/ static void
-Application_button_setting_connect (Application *self, Dice *dice, int index)
-{
-  on_click_data *data = malloc (sizeof (on_click_data));
-  MALLOC_TEST_ERROR(data);
-
-  data->self = self;
-  data->dice = dice;
-
-  g_signal_connect(G_OBJECT(self->buttons[index].button), "clicked",
-		   G_CALLBACK(on_click), (gpointer)data);
 }
 
 /*private*/ static void

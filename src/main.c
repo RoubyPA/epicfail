@@ -37,7 +37,7 @@ usage (char **argv)
 void
 version (void)
 {
-  printf ("EpicFail: Version 0.2.0 (Alfa)\n");
+  printf ("EpicFail: Version 0.2.1 (Alfa)\n");
   printf ("   Build:       %s(%s)\n", __DATE__, __TIME__);
   printf ("   License:     Gnu GPLv3\n");
   printf ("   Source code: <https://github.com/RoubyPA/epicfail>\n");

@@ -109,7 +109,7 @@ About_new_window (About *self)
 			       HEIGHT, WIDTH);
   gtk_window_set_resizable (GTK_WINDOW(self->window), FALSE);
   
-  self->m_vbox = gtk_vbox_new (FALSE, 1);
+  self->m_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 1);
   self->label = gtk_label_new ("");
 
   About_create_image (self);
