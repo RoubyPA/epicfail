@@ -13,7 +13,11 @@
 #define CONFIG_STD_STRING_SIZE 32
 #define CONFIG_LONG_STRING_SIZE 1024
 
+#ifndef PREFIX
 #define DEFAULT_CONFIG_PATH "/share/epicfail"
+#else
+#define DEFAULT_CONFIG_PATH PREFIX "/share/epicfail"
+#endif
 
 /*private*/ static void Config_init_0 (Config *);
 /*private*/ static void Config_init_alloc (Config *);

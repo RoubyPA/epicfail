@@ -12,4 +12,4 @@ run:
 	EF_DIR=./data $(BUILD_PATH)/epicfail
 
 clean:
-	make -C src/ clean
+	BUILD_PATH=../$(BUILD_PATH) make -C src/ clean

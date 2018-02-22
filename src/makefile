@@ -1,6 +1,6 @@
 CC=gcc
 
-OPT=-Wall -g -pedantic
+OPT=-Wall -g -pedantic -DPREFIX="\""$(PREFIX)"\""
 CFLAGS=`pkg-config --cflags gobject-2.0 gtk+-3.0`
 LDFLAGS=`pkg-config --libs gobject-2.0 gtk+-3.0`
 
