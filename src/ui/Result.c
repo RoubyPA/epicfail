@@ -10,6 +10,15 @@
 #define HEIGHT 400
 #define WIDTH 300
 
+#define EPICFAIL    0.95
+#define FAIL        0.50
+#define EPICSUCCESS 0.05
+
+#define IMG_EPICFAIL    "/images/epicfail.png"
+#define IMG_FAIL        "/images/fail.png"
+#define IMG_SUCCESS     "/images/success.png"
+#define IMG_EPICSUCCESS "/images/epicsuccess.png"
+
 /*private*/ static void on_quit (GtkWidget *w, gpointer data);
 /*private*/ static void Result_init_0 (Result *self);
 /*private*/ static void Result_hide (Result *self);
@@ -18,6 +27,8 @@
 /*private*/ static void Result_create_label (Result *self);
 /*private*/ static void Result_update_label (Result *self, char *str);
 /*private*/ static void Result_connect (Result *self);
+/*private*/ static void Result_update_image (Result *self, int dice, int value);
+
   
 /******************************************************************************
  * Public method                                                              *
@@ -73,7 +84,10 @@ Result_update_with_dice_result (Result *self, int dice, int value)
   sprintf (buffer, "\n<span font_desc=\"bold\">%d</span> / %d", value, dice);
   
   Result_update_label(self, buffer);
+  Result_update_image(self, dice, value);
 
+  Result_show (self);
+  
   free (buffer);
 }
 
@@ -168,6 +182,31 @@ Result_update_label (Result *self, char *str)
   
   buffer = g_locale_to_utf8 (str, -1, NULL, NULL, NULL);
   gtk_label_set_markup (GTK_LABEL (self->label), buffer);
+}
+
+/*private*/ static void
+Result_update_image (Result *self, int dice, int value)
+{
+  float result = 0;
+  char *buffer = malloc (256); /* TODO global macro */
+  MALLOC_TEST_ERROR (buffer);
+
+  result = (float)value / (float)dice;
+  
+  strcpy(buffer, self->conf->dir);
+  if (result <= EPICSUCCESS)
+    strcat (buffer, IMG_EPICSUCCESS);
+  else if (result <= FAIL)
+    strcat (buffer, IMG_SUCCESS);
+  else if (result > FAIL && result < EPICFAIL)
+    strcat (buffer, IMG_FAIL);
+  else
+    strcat (buffer, IMG_EPICFAIL);
+
+  gtk_image_set_from_file (GTK_IMAGE(self->image),
+			   buffer);
+
+  free (buffer);
 }
 
 /*private*/ static void
