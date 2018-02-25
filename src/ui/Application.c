@@ -22,7 +22,7 @@ struct _on_click_data {
 /*private*/ static void Application_init_alloc (Application *self);
 /*private*/ static void Application_show (Application *self);
 /*private*/ static void Application_new_window (Application *self);
-/* /\*private*\/ static void Application_set_menu (Application *self); */
+/*private*/ static void Application_create_menu (Application *self);
 /*private*/ static void Application_connect (Application *self);
 /*private*/ static void Application_create_buttons (Application *self);
 /*private*/ static void Application_button_connect (Application *self, Dice *dice, int index);
@@ -81,7 +81,7 @@ Application_init (Application *self, int argc, char **argv, char **env)
 Application_create (Application *self)
 {
   Application_new_window (self);
-  // Application_create_menu (self);
+  Application_create_menu (self);
   Application_create_buttons (self);
   Application_connect (self);
   Application_show (self);
@@ -128,17 +128,16 @@ on_quit (GtkWidget *w, gpointer data)
 Application_init_0 (Application *self)
 {
   int i;
-  
+
   self->title = NULL;
-  
+
   self->window = NULL;
   self->m_hbox = NULL;
   self->l_vbox = NULL;
   self->r_vbox = NULL;
   self->menu_bar = NULL;
-  self->menu = NULL;
   self->menu_item = NULL;
-  
+
   for (i = 0 ; i <= MAX_DICE_NUM ; i++)
     {
       self->buttons[i].dice = NULL;
@@ -165,38 +164,39 @@ Application_show (Application *self)
 Application_new_window (Application *self)
 { 
   self->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
- 
+
   gtk_window_set_title (GTK_WINDOW(self->window), self->title);
   gtk_window_set_default_size (GTK_WINDOW(self->window),
 			       HEIGHT, WIDTH);
   gtk_window_set_resizable (GTK_WINDOW(self->window), FALSE);
- 
+
+  self->m_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
   self->m_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
   self->l_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
   self->r_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-  
-  gtk_container_add(GTK_CONTAINER(self->window), self->m_hbox);
-  gtk_container_add(GTK_CONTAINER(self->m_hbox), self->l_vbox);
-  gtk_container_add(GTK_CONTAINER(self->m_hbox), self->r_vbox);
 }
 
-/* /\*private*\/ static void */
-/* Application_create_menu (Application *self) */
-/* { */
-  /* self->menu_bar = gtk_menu_bar_new (); */
-  /* self->menu = gtk_menu_new (); */
-  
-  /* self->menu_item = gtk_menu_item_new_with_label (self->conf->dico.App_menu_pref); */
-  /* self->menu_item = gtk_menu_item_new_with_label (self->conf->dico.App_menu_about); */
-  /* self->menu_item = gtk_menu_item_new_with_label (self->conf->dico.App_menu_name); */
-  
-  /* gtk_menu_item_set_submenu(GTK_MENU_ITEM(self->menu_item), */
-  /* 			    self->menu); */
-  /* gtk_menu_shell_append(self->menu_bar, self->menu_item); */
+/*private*/ static void
+Application_create_menu (Application *self)
+{
+  on_click_data *data = malloc (sizeof (on_click_data));
+  MALLOC_TEST_ERROR(data);
 
-  /* gtk_box_pack_start(GTK_BOX(self->m_hbox), */
-  /* 		     self->menu_bar, FALSE, FALSE, 0); */
-/* } */
+  data->self = self;
+  data->dice = NULL;
+
+  gtk_container_add(GTK_CONTAINER(self->window), self->m_vbox);
+
+  self->menu_bar = gtk_menu_bar_new ();
+  self->menu_item = gtk_menu_item_new_with_label ("About");
+
+  gtk_menu_shell_append(GTK_MENU_SHELL(self->menu_bar), self->menu_item);
+  gtk_box_pack_start(GTK_BOX(self->m_vbox),
+		     self->menu_bar, FALSE, FALSE, 0);
+
+  g_signal_connect(G_OBJECT(self->menu_item), "activate",
+		   G_CALLBACK(on_click), (gpointer)data);
+}
 
 /*private*/ static void
 Application_create_buttons (Application *self)
@@ -205,6 +205,10 @@ Application_create_buttons (Application *self)
   int dice_num[] = {4, 6, 8, 10, 12, 20, 100, 0, -1};
   char *buffer = malloc(256);
   MALLOC_TEST_ERROR(buffer);
+
+  gtk_container_add(GTK_CONTAINER(self->m_vbox), self->m_hbox);
+  gtk_container_add(GTK_CONTAINER(self->m_hbox), self->l_vbox);
+  gtk_container_add(GTK_CONTAINER(self->m_hbox), self->r_vbox);
 
   while (dice_num[++index] >= 0)
     {

@@ -38,11 +38,11 @@ struct _Application
   
   /*public*/ char *title;
   /*public*/ GtkWidget *window;
+  /*public*/ GtkWidget *m_vbox;
   /*public*/ GtkWidget *m_hbox;
   /*public*/ GtkWidget *l_vbox;
   /*public*/ GtkWidget *r_vbox;
   /*public*/ GtkWidget *menu_bar;
-  /*public*/ GtkWidget *menu;
   /*public*/ GtkWidget *menu_item;
 
   /*public*/ dice_button buttons[MAX_DICE_NUM];
