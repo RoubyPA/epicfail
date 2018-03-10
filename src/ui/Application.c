@@ -9,7 +9,7 @@
 #define HEIGHT 200
 #define WIDTH 400
 
-#define IMG_FORMAT "%s/images/d%.3d.png"
+#define IMG_FORMAT "%s/d%.3d.png"
 
 typedef struct _on_click_data on_click_data;
 struct _on_click_data {
@@ -73,6 +73,10 @@ Application_init (Application *self, int argc, char **argv, char **env)
   self->result = g_object_new (TYPE_RESULT, NULL);
   Result_init (self->result, self->conf);
   Result_create (self->result);
+
+  self->pref = g_object_new (TYPE_PREFERENCE, NULL);
+  Preference_init (self->pref, self->conf);
+  Preference_create (self->pref);
   
   self->title = self->conf->dico.App_title;
 }
@@ -114,8 +118,16 @@ on_click (GtkWidget *w, gpointer data)
     }
   else
     {
-      About_show (self->about);  
+      Preference_show (self->pref);  
     }
+}
+
+/*private*/ static void
+menu_on_click (GtkWidget *w, gpointer data)
+{
+  Application *self = data;
+
+  About_show (self->about);
 }
 
 /*private*/ static void
@@ -179,23 +191,17 @@ Application_new_window (Application *self)
 /*private*/ static void
 Application_create_menu (Application *self)
 {
-  on_click_data *data = malloc (sizeof (on_click_data));
-  MALLOC_TEST_ERROR(data);
-
-  data->self = self;
-  data->dice = NULL;
-
   gtk_container_add(GTK_CONTAINER(self->window), self->m_vbox);
 
   self->menu_bar = gtk_menu_bar_new ();
-  self->menu_item = gtk_menu_item_new_with_label ("About");
+  self->menu_item = gtk_menu_item_new_with_label (self->conf->dico.App_menu_about);
 
   gtk_menu_shell_append(GTK_MENU_SHELL(self->menu_bar), self->menu_item);
   gtk_box_pack_start(GTK_BOX(self->m_vbox),
 		     self->menu_bar, FALSE, FALSE, 0);
 
   g_signal_connect(G_OBJECT(self->menu_item), "activate",
-		   G_CALLBACK(on_click), (gpointer)data);
+		   G_CALLBACK(menu_on_click), (gpointer)self);
 }
 
 /*private*/ static void
@@ -203,9 +209,15 @@ Application_create_buttons (Application *self)
 {
   int index = -1;
   int dice_num[] = {4, 6, 8, 10, 12, 20, 100, 0, -1};
+  char *path = malloc(256);
   char *buffer = malloc(256);
+  MALLOC_TEST_ERROR(path);
   MALLOC_TEST_ERROR(buffer);
 
+  strcpy (path, (const char *)Config_get_confdir (self->conf));
+  strcat (path, "/");
+  strcat (path, (const char *)Config_get_theme (self->conf));
+  
   gtk_container_add(GTK_CONTAINER(self->m_vbox), self->m_hbox);
   gtk_container_add(GTK_CONTAINER(self->m_hbox), self->l_vbox);
   gtk_container_add(GTK_CONTAINER(self->m_hbox), self->r_vbox);
@@ -214,7 +226,7 @@ Application_create_buttons (Application *self)
     {
       self->buttons[index].button = gtk_button_new ();
   
-      sprintf (buffer, IMG_FORMAT, self->conf->dir, dice_num[index]);
+      sprintf (buffer, IMG_FORMAT, path, dice_num[index]);
       self->buttons[index].image = gtk_image_new_from_file (buffer);
    
       gtk_box_pack_start (GTK_BOX (index%2 == 0 ? self->l_vbox: self->r_vbox),

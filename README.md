@@ -17,7 +17,16 @@ make run
 ```
 
 #### Installation
-_Coming soon_ :wink:
+```shell
+make install
+```
+
+#### Change install dir
+```shell
+export PREFIX=/my/prefix/
+make
+sudo make install
+```
 
 ### Get from package
 _Coming soon_ :wink:
@@ -26,11 +35,11 @@ _Coming soon_ :wink:
 ### TODO list
  - [x] (**0.2.2**) Update image on Result window (epic success / success / fail / epic fail)
  - [x] Fix compilation warning :warning:
- - [ ] Add makefile install instruction
+ - [x] Add makefile install instruction
  - [x] Add menu
- - [ ] (**0.2.3**) Setting window
+ - [x] (**0.2.3**) Setting window
  - [ ] Add permanent setting in Config class
  - [ ] Add new language (:fr: / ...)
- - [ ] Add theme manager
+ - [x] Add theme manager
  - [ ] Debian package 
  - [ ] Guix package

@@ -14,11 +14,7 @@ typedef struct _wordlist wordlist;
 struct _wordlist
 {
   char *App_title;
-  char *App_menu_name;
-  char *App_menu_pref;
   char *App_menu_about;
-  char *App_menu_theme;
-  char *App_menu_lang;
 
   char *About_title;
   char *About_label;
@@ -27,6 +23,12 @@ struct _wordlist
   char *Result_title;
   char *Result_label;
   char *Result_button;
+
+  char *Preference_title;
+  char *Preference_label;
+  char *Preference_theme_label;
+  char *Preference_lang_label;
+  char *Preference_button;
 };
 
 typedef struct _Config Config;
@@ -55,6 +57,9 @@ struct _ConfigClass
 /*public*/ void Config_init (Config *, int, char **, char **);
 /*public*/ void Config_change_lang (Config *);
 /*public*/ void Config_change_theme (Config *);
+/*public*/ const char *Config_get_confdir (Config *);
+/*public*/ const char *Config_get_theme (Config *);
+/*public*/ void Config_save_file (Config *);
 /*public*/ void Config_finalize (Config *);
 
 #endif /*CONFIG_H*/

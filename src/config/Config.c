@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 #include "Config.h"
 
@@ -12,6 +14,9 @@
 #define CONFIG_PATH_MAX_SIZE 256
 #define CONFIG_STD_STRING_SIZE 32
 #define CONFIG_LONG_STRING_SIZE 1024
+
+#define CONFIG_FORMAT "%s = %s\n"
+#define CONFIG_FILE "/epicfail.conf"
 
 #ifndef PREFIX
 #define DEFAULT_CONFIG_PATH "/share/epicfail"
@@ -26,6 +31,7 @@
 /*private*/ static void Config_set_lang (Config *);
 /*private*/ static void Config_init_dir (Config *);
 /*private*/ static void Config_finalize_free (Config *);
+/*private*/ static void Config_read_config (Config *);
 
 /******************************************************************************
  * Public method                                                              *
@@ -63,8 +69,23 @@ Config_init (Config *self, int argc, char **argv, char **env)
 
   Config_init_0 (self);
   Config_lang_init_0 (self);
-  Config_set_lang (self);
+  
   Config_init_dir (self);
+  Config_read_config (self);
+  
+  Config_set_lang (self);
+}
+
+/*public*/ const char *
+Config_get_confdir (Config *self)
+{
+  return (const char *)self->dir;
+}
+
+/*public*/ const char *
+Config_get_theme (Config *self)
+{
+  return (const char *)self->theme;
 }
 
 /*public*/ void
@@ -77,6 +98,31 @@ Config_change_lang (Config *self)
 Config_change_theme (Config *self)
 {
   
+}
+
+/*public*/ void
+Config_save_file (Config *self)
+{
+  FILE *conf = NULL;
+  char *path = NULL;
+
+  path = malloc (CONFIG_PATH_MAX_SIZE);
+  MALLOC_TEST_ERROR (path);
+  
+  strcpy (path, self->dir);
+  strcat (path, CONFIG_FILE);
+  
+  conf = fopen (path, "w+");
+  if (conf == NULL)
+    ef_error ("open config file");
+
+  fprintf (conf, "# Epicfail configuration file !\n");
+  fprintf (conf, "# DO NOT EDIT !\n");
+  
+  fprintf (conf, "lang = %s\n", self->lang);
+  fprintf (conf, "theme = %s\n", self->theme);
+
+  fclose (conf);
 }
 
 /*public*/ void
@@ -116,11 +162,7 @@ Config_init_alloc (Config *self)
 Config_lang_init_0 (Config *self)
 {
   self->dico.App_title = NULL;
-  self->dico.App_menu_name = NULL;
-  self->dico.App_menu_pref = NULL;
   self->dico.App_menu_about = NULL;
-  self->dico.App_menu_theme = NULL;
-  self->dico.App_menu_lang = NULL;
 
   self->dico.About_title = NULL;
   self->dico.About_label = NULL;
@@ -129,6 +171,12 @@ Config_lang_init_0 (Config *self)
   self->dico.Result_title = NULL;
   self->dico.Result_label = NULL;
   self->dico.Result_button = NULL;
+
+  self->dico.Preference_title = NULL;
+  self->dico.Preference_label = NULL;
+  self->dico.Preference_theme_label = NULL;
+  self->dico.Preference_lang_label = NULL;
+  self->dico.Preference_button = NULL;
 
   Config_lang_alloc (self);  
 }
@@ -139,20 +187,8 @@ Config_lang_alloc (Config *self)
   self->dico.App_title = malloc(CONFIG_STD_STRING_SIZE);
   MALLOC_TEST_ERROR (self->dico.App_title);
   
-  self->dico.App_menu_name = malloc(CONFIG_STD_STRING_SIZE);
-  MALLOC_TEST_ERROR (self->dico.App_menu_name);
-  
-  self->dico.App_menu_pref = malloc(CONFIG_STD_STRING_SIZE);
-  MALLOC_TEST_ERROR (self->dico.App_menu_pref);
-  
   self->dico.App_menu_about = malloc(CONFIG_STD_STRING_SIZE);
   MALLOC_TEST_ERROR (self->dico.App_menu_about);
-  
-  self->dico.App_menu_theme = malloc(CONFIG_STD_STRING_SIZE);
-  MALLOC_TEST_ERROR (self->dico.App_menu_theme);
-    
-  self->dico.App_menu_lang = malloc(CONFIG_STD_STRING_SIZE);
-  MALLOC_TEST_ERROR (self->dico.App_menu_lang);
 
   
   self->dico.About_title = malloc(CONFIG_STD_STRING_SIZE);
@@ -173,17 +209,77 @@ Config_lang_alloc (Config *self)
   
   self->dico.Result_button = malloc(CONFIG_STD_STRING_SIZE);
   MALLOC_TEST_ERROR (self->dico.Result_button);
+
+  
+  self->dico.Preference_title = malloc(CONFIG_STD_STRING_SIZE);
+  MALLOC_TEST_ERROR (self->dico.Preference_title);
+
+  self->dico.Preference_label = malloc(CONFIG_STD_STRING_SIZE);
+  MALLOC_TEST_ERROR (self->dico.Preference_label);
+
+  self->dico.Preference_theme_label = malloc(CONFIG_STD_STRING_SIZE);
+  MALLOC_TEST_ERROR (self->dico.Preference_theme_label);
+
+  self->dico.Preference_lang_label = malloc(CONFIG_STD_STRING_SIZE);
+  MALLOC_TEST_ERROR (self->dico.Preference_lang_label);
+
+  self->dico.Preference_button = malloc(CONFIG_STD_STRING_SIZE);
+  MALLOC_TEST_ERROR (self->dico.Preference_button);
+
+}
+
+/*private*/ static void
+Config_read_config (Config *self)
+{
+  char *path = NULL;
+  char *name = NULL;
+  char *value = NULL;
+  char *buffer = NULL;
+  FILE *conf = NULL;
+
+  path = malloc (CONFIG_PATH_MAX_SIZE);
+  MALLOC_TEST_ERROR (path);
+  buffer = malloc (CONFIG_PATH_MAX_SIZE);
+  MALLOC_TEST_ERROR (buffer);
+  name = malloc (CONFIG_PATH_MAX_SIZE);
+  MALLOC_TEST_ERROR (name);
+  value = malloc (CONFIG_PATH_MAX_SIZE);
+  MALLOC_TEST_ERROR (value);
+
+  strcpy (path, self->dir);
+  strcat (path, CONFIG_FILE);
+  
+  conf = fopen (path, "r");
+  if (conf == NULL)
+    ef_error ("fopen");
+
+  while (fgets (buffer, CONFIG_PATH_MAX_SIZE, conf) != NULL)
+    {
+      if (buffer[0] == '#')
+	continue;
+      
+      sscanf (buffer, CONFIG_FORMAT, name, value);
+
+      if (strcmp (name, "lang") == 0)
+	strcpy (self->lang, value);
+      else if (strcmp (name, "theme") == 0)
+	strcpy (self->theme, value);
+      else
+	printf ("[WARNING] Unknow config name \"%s\"\n", name);
+    }
+
+  fclose (conf);
+  free (buffer);
+  free (name);
+  free (value);
+  free (path);
 }
 
 /*private*/ static void
 Config_set_lang (Config *self)
 {
   strcpy (self->dico.App_title, "Epicfail (Alpha)");
-  strcpy (self->dico.App_menu_name, "File");
-  strcpy (self->dico.App_menu_pref, "Preference");
   strcpy (self->dico.App_menu_about, "About");
-  strcpy (self->dico.App_menu_theme, "Theme");
-  strcpy (self->dico.App_menu_lang, "Language");
 
   strcpy (self->dico.About_title , "Epicfail - About");
   strcpy (self->dico.About_button, "Quit");
@@ -201,6 +297,12 @@ Config_set_lang (Config *self)
   strcpy (self->dico.Result_title , "Epicfail - Result");
   strcpy (self->dico.Result_button, "Quit");
   strcpy (self->dico.Result_label, "No result...");
+  
+  strcpy (self->dico.Preference_title, "Epicfail - Setting");
+  strcpy (self->dico.Preference_label, "Setting");
+  strcpy (self->dico.Preference_theme_label, "Theme");
+  strcpy (self->dico.Preference_lang_label, "Language");
+  strcpy (self->dico.Preference_button, "Save");
 }
 
 /*private*/ static void
@@ -216,16 +318,11 @@ Config_init_dir (Config *self)
     self->dir = buffer;
 }
 
-
 /*private*/ static void
 Config_finalize_free (Config *self)
 { 
   free (self->dico.App_title);
-  free (self->dico.App_menu_name);
-  free (self->dico.App_menu_pref);
   free (self->dico.App_menu_about);
-  free (self->dico.App_menu_theme);
-  free (self->dico.App_menu_lang);
   
   free (self->dico.About_title);
   free (self->dico.About_label);
@@ -234,4 +331,10 @@ Config_finalize_free (Config *self)
   free (self->dico.Result_title);
   free (self->dico.Result_label);
   free (self->dico.Result_button);
+
+  free (self->dico.Preference_title);
+  free (self->dico.Preference_label);
+  free (self->dico.Preference_theme_label);
+  free (self->dico.Preference_lang_label);
+  free (self->dico.Preference_button);
 }

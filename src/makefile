@@ -10,7 +10,8 @@ APP_OBJ=error.o \
 	Result.o \
 	Application.o \
 	main.o \
-	Dice.o
+	Dice.o \
+	Preference.o
 
 all: Application
 
@@ -18,10 +19,14 @@ Application: $(APP_OBJ)
 	$(CC) $(OPT) $(BUILD_PATH)/main.o $(BUILD_PATH)/error.o \
 			$(BUILD_PATH)/About.o $(BUILD_PATH)/Config.o \
 			$(BUILD_PATH)/Result.o $(BUILD_PATH)/Dice.o \
-			$(BUILD_PATH)/Application.o -o $(BUILD_PATH)/epicfail $(LDFLAGS)
+			$(BUILD_PATH)/Application.o $(BUILD_PATH)/Preference.o \
+			-o $(BUILD_PATH)/epicfail $(LDFLAGS)
 
 Application.o: ui/Application.c
 	$(CC) $(OPT) -c ui/Application.c -o $(BUILD_PATH)/Application.o $(CFLAGS)
+
+Preference.o: ui/Preference.c
+	$(CC) $(OPT) -c ui/Preference.c -o $(BUILD_PATH)/Preference.o $(CFLAGS)
 
 About.o: ui/About.c
 	$(CC) $(OPT) -c ui/About.c -o $(BUILD_PATH)/About.o $(CFLAGS)

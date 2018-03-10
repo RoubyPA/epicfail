@@ -14,10 +14,10 @@
 #define FAIL        0.50
 #define EPICSUCCESS 0.05
 
-#define IMG_EPICFAIL    "/images/epicfail.png"
-#define IMG_FAIL        "/images/fail.png"
-#define IMG_SUCCESS     "/images/success.png"
-#define IMG_EPICSUCCESS "/images/epicsuccess.png"
+#define IMG_EPICFAIL    "/epicfail.png"
+#define IMG_FAIL        "/fail.png"
+#define IMG_SUCCESS     "/success.png"
+#define IMG_EPICSUCCESS "/epicsuccess.png"
 
 /*private*/ static void on_quit (GtkWidget *w, gpointer data);
 /*private*/ static void Result_init_0 (Result *self);
@@ -157,8 +157,10 @@ Result_create_image (Result *self)
   char *buffer = malloc (256); /* TODO global macro */
   MALLOC_TEST_ERROR (buffer);
 
-  strcpy(buffer, self->conf->dir);
-  strcat(buffer, "/images/epicfail.png");
+  strcpy(buffer, Config_get_confdir(self->conf));
+  strcat(buffer, "/");
+  strcat(buffer, Config_get_theme(self->conf));
+  strcat(buffer, IMG_EPICFAIL);
     
   self->image = gtk_image_new_from_file (buffer);
 
@@ -188,12 +190,15 @@ Result_update_label (Result *self, char *str)
 Result_update_image (Result *self, int dice, int value)
 {
   float result = 0;
-  char *buffer = malloc (256); /* TODO global macro */
+  char *buffer = malloc (256);
   MALLOC_TEST_ERROR (buffer);
 
   result = (float)value / (float)dice;
   
-  strcpy(buffer, self->conf->dir);
+  strcpy(buffer, Config_get_confdir(self->conf));
+  strcat(buffer, "/");
+  strcat(buffer, Config_get_theme(self->conf));
+  
   if (result <= EPICSUCCESS)
     strcat (buffer, IMG_EPICSUCCESS);
   else if (result <= FAIL)
@@ -202,7 +207,7 @@ Result_update_image (Result *self, int dice, int value)
     strcat (buffer, IMG_FAIL);
   else
     strcat (buffer, IMG_EPICFAIL);
-
+  
   gtk_image_set_from_file (GTK_IMAGE(self->image),
 			   buffer);
 

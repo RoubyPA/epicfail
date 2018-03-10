@@ -128,8 +128,10 @@ About_create_image (About *self)
   char *buffer = malloc (256); /* TODO global macro */
   MALLOC_TEST_ERROR (buffer);
 
-  strcpy(buffer, self->conf->dir);
-  strcat(buffer, "/images/epicfail.png");
+  strcpy(buffer, Config_get_confdir(self->conf));
+  strcat(buffer, "/");
+  strcat(buffer, Config_get_theme(self->conf));
+  strcat(buffer, "/epicfail.png");
     
   self->image = gtk_image_new_from_file (buffer);
 

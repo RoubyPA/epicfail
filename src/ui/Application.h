@@ -8,6 +8,7 @@
 #include "../dice/Dice.h"
 #include "About.h"
 #include "Result.h"
+#include "Preference.h"
 
 #define TYPE_APPLICATION            (Application_get_type ())
 #define APPLICATION(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_APPLICATION, Application))
@@ -35,6 +36,7 @@ struct _Application
   /*public*/ Config *conf;
   /*public*/ About *about;
   /*public*/ Result *result;
+  /*public*/ Preference *pref;
   
   /*public*/ char *title;
   /*public*/ GtkWidget *window;
